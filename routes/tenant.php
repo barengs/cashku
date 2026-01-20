@@ -37,6 +37,9 @@ Route::middleware([
             
             Route::apiResource('suppliers', App\Http\Controllers\SupplierController::class);
             Route::apiResource('ingredients', App\Http\Controllers\IngredientController::class);
+
+            Route::post('purchase-orders/{id}/receive', [App\Http\Controllers\PurchaseOrderController::class, 'receive']);
+            Route::apiResource('purchase-orders', App\Http\Controllers\PurchaseOrderController::class);
         });
     });
 });
