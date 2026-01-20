@@ -18,6 +18,7 @@ class PurchaseOrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'branch_id' => 'required|uuid|exists:branches,id',
             'supplier_id' => 'required|uuid|exists:suppliers,id',
             'order_date' => 'required|date',
             'status' => 'in:pending,approved,received,cancelled',
@@ -35,6 +36,7 @@ class PurchaseOrderController extends Controller
             }
 
             $po = PurchaseOrder::create([
+                'branch_id' => $validated['branch_id'],
                 'supplier_id' => $validated['supplier_id'],
                 'order_date' => $validated['order_date'],
                 'status' => $validated['status'] ?? 'pending',
@@ -60,7 +62,7 @@ class PurchaseOrderController extends Controller
 
     public function show($id)
     {
-        $po = PurchaseOrder::with(['supplier', 'items.ingredient'])->findOrFail($id);
+        $po = PurchaseOrder::with(['supplier', 'items.ingredient', 'branch'])->findOrFail($id);
         return response()->json($po);
     }
 
@@ -73,6 +75,7 @@ class PurchaseOrderController extends Controller
         }
 
         $validated = $request->validate([
+            'branch_id' => 'uuid|exists:branches,id',
             'supplier_id' => 'uuid|exists:suppliers,id',
             'order_date' => 'date',
             'status' => 'in:pending,approved,cancelled',
@@ -128,14 +131,15 @@ class PurchaseOrderController extends Controller
 
         DB::beginTransaction();
         try {
-            // Update Stock
+            // Update Stock in BranchStock
             foreach ($po->items as $item) {
-                $ingredient = Ingredient::find($item->ingredient_id);
-                if ($ingredient) {
-                    $ingredient->current_stock += $item->quantity;
-                    // Optional: Update cost_per_unit logic could go here
-                    $ingredient->save();
-                }
+                $branchStock = \App\Models\BranchStock::firstOrNew([
+                    'branch_id' => $po->branch_id,
+                    'ingredient_id' => $item->ingredient_id,
+                ]);
+                
+                $branchStock->quantity = ($branchStock->quantity ?? 0) + $item->quantity;
+                $branchStock->save();
             }
 
             $po->status = 'received';

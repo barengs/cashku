@@ -79,10 +79,12 @@ class PurchaseOrderTest extends TestCase
     public function test_can_create_purchase_order()
     {
         $this->authenticate();
+        $branch = \App\Models\Branch::create(['name' => 'Main Branch']);
         $supplier = Supplier::create(['name' => 'Test Supplier', 'phone' => '123', 'address' => 'Test Address']);
-        $ingredient = Ingredient::create(['name' => 'Test Ingredient', 'unit' => 'kg', 'current_stock' => 10]);
+        $ingredient = Ingredient::create(['name' => 'Test Ingredient', 'unit' => 'kg']); // No global stock
 
         $payload = [
+            'branch_id' => $branch->id,
             'supplier_id' => $supplier->id,
             'order_date' => now()->format('Y-m-d'),
             'status' => 'pending',
@@ -102,6 +104,7 @@ class PurchaseOrderTest extends TestCase
             ->assertJsonStructure(['id', 'total_amount', 'items']);
 
         $this->assertDatabaseHas('purchase_orders', [
+            'branch_id' => $branch->id,
             'supplier_id' => $supplier->id,
             'total_amount' => 50000
         ]);
@@ -110,11 +113,13 @@ class PurchaseOrderTest extends TestCase
     public function test_can_update_purchase_order_items_sync()
     {
         $this->authenticate();
+        $branch = \App\Models\Branch::create(['name' => 'Main Branch']);
         $supplier = Supplier::create(['name' => 'Supplier A', 'phone' => '123', 'address' => 'Addr']);
-        $ingredient1 = Ingredient::create(['name' => 'Ing 1', 'unit' => 'kg', 'current_stock' => 0]);
-        $ingredient2 = Ingredient::create(['name' => 'Ing 2', 'unit' => 'kg', 'current_stock' => 0]);
+        $ingredient1 = Ingredient::create(['name' => 'Ing 1', 'unit' => 'kg']);
+        $ingredient2 = Ingredient::create(['name' => 'Ing 2', 'unit' => 'kg']);
 
         $po = PurchaseOrder::create([
+            'branch_id' => $branch->id,
             'supplier_id' => $supplier->id,
             'order_date' => now(),
             'status' => 'pending',
@@ -129,6 +134,7 @@ class PurchaseOrderTest extends TestCase
         ]);
 
         $payload = [
+            'branch_id' => $branch->id,
             'supplier_id' => $supplier->id,
             'order_date' => now()->format('Y-m-d'),
             'status' => 'pending',
@@ -162,10 +168,19 @@ class PurchaseOrderTest extends TestCase
     public function test_can_receive_purchase_order_and_update_stock()
     {
         $this->authenticate();
+        $branch = \App\Models\Branch::create(['name' => 'Main Branch']);
         $supplier = Supplier::create(['name' => 'Supplier A', 'phone' => '123', 'address' => 'Addr']);
-        $ingredient = Ingredient::create(['name' => 'Ing 1', 'unit' => 'kg', 'current_stock' => 10]);
+        $ingredient = Ingredient::create(['name' => 'Ing 1', 'unit' => 'kg']);
+        
+        // Initial stock at branch
+        \App\Models\BranchStock::create([
+            'branch_id' => $branch->id,
+            'ingredient_id' => $ingredient->id,
+            'quantity' => 10
+        ]);
 
         $po = PurchaseOrder::create([
+            'branch_id' => $branch->id,
             'supplier_id' => $supplier->id,
             'order_date' => now(),
             'status' => 'pending',
@@ -184,15 +199,17 @@ class PurchaseOrderTest extends TestCase
         $response->assertStatus(200)
             ->assertJson(['status' => 'received']);
 
-        $this->assertEquals(30, $ingredient->fresh()->current_stock);
+        $this->assertEquals(30, \App\Models\BranchStock::where('branch_id', $branch->id)->first()->quantity);
     }
 
     public function test_cannot_update_received_order()
     {
         $this->authenticate();
+        $branch = \App\Models\Branch::create(['name' => 'Main Branch']);
         $supplier = Supplier::create(['name' => 'Supplier A', 'phone' => '123', 'address' => 'Addr']);
         
         $po = PurchaseOrder::create([
+            'branch_id' => $branch->id,
             'supplier_id' => $supplier->id,
             'order_date' => now(),
             'status' => 'received',
@@ -200,6 +217,7 @@ class PurchaseOrderTest extends TestCase
         ]);
 
         $response = $this->putJson("http://test.localhost/api/purchase-orders/{$po->id}", [
+            'branch_id' => $branch->id,
             'supplier_id' => $supplier->id,
             'order_date' => now()->format('Y-m-d'),
             'status' => 'pending'

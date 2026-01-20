@@ -6,21 +6,18 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PurchaseOrder extends Model
+class BranchStock extends Model
 {
     use HasFactory, HasUuids;
 
     protected $fillable = [
         'branch_id',
-        'supplier_id',
-        'order_date',
-        'status',
-        'total_amount',
+        'ingredient_id',
+        'quantity',
     ];
 
     protected $casts = [
-        'order_date' => 'date',
-        'total_amount' => 'decimal:2',
+        'quantity' => 'decimal:2',
     ];
 
     public function branch()
@@ -28,13 +25,8 @@ class PurchaseOrder extends Model
         return $this->belongsTo(Branch::class);
     }
 
-    public function supplier()
+    public function ingredient()
     {
-        return $this->belongsTo(Supplier::class);
-    }
-
-    public function items()
-    {
-        return $this->hasMany(PurchaseOrderItem::class);
+        return $this->belongsTo(Ingredient::class);
     }
 }

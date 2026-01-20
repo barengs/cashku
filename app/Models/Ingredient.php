@@ -15,12 +15,19 @@ class Ingredient extends Model
         'unit',
         'cost_per_unit',
         'minimum_stock',
-        'current_stock',
     ];
 
     protected $casts = [
         'cost_per_unit' => 'decimal:2',
-        'minimum_stock' => 'integer',
-        'current_stock' => 'integer',
     ];
+
+    public function stocks()
+    {
+        return $this->hasMany(BranchStock::class);
+    }
+
+    public function stockForBranch($branchId)
+    {
+        return $this->stocks()->where('branch_id', $branchId)->first()?->quantity ?? 0;
+    }
 }
