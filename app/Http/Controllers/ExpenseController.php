@@ -8,8 +8,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 
+/**
+ * @group Finance
+ * @description APIs for managing expenses.
+ */
 class ExpenseController extends Controller
 {
+    /**
+     * List Expenses
+     * @description Get a list of expenses.
+     * @queryParam branch_id string Filter by Branch.
+     * @queryParam date string Filter by date.
+     */
     public function index(Request $request)
     {
         try {
@@ -26,6 +36,16 @@ class ExpenseController extends Controller
         }
     }
 
+    /**
+     * Create Expense
+     * @description Record a new expense.
+     * @bodyParam branch_id string required Branch UUID.
+     * @bodyParam name string required Expense Name.
+     * @bodyParam amount number required Amount.
+     * @bodyParam category string required Category.
+     * @bodyParam date date required Expense Date.
+     * @bodyParam note string optional Note.
+     */
     public function store(Request $request)
     {
         try {
@@ -49,6 +69,10 @@ class ExpenseController extends Controller
         }
     }
 
+    /**
+     * Show Expense
+     * @description Get expense details.
+     */
     public function show($id)
     {
         try {
@@ -59,6 +83,15 @@ class ExpenseController extends Controller
         }
     }
 
+    /**
+     * Update Expense
+     * @description Update expense details.
+     * @bodyParam name string optional Name.
+     * @bodyParam amount number optional Amount.
+     * @bodyParam category string optional Category.
+     * @bodyParam date date optional Date.
+     * @bodyParam note string optional Note.
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -79,6 +112,10 @@ class ExpenseController extends Controller
         }
     }
 
+    /**
+     * Delete Expense
+     * @description Delete an expense.
+     */
     public function destroy($id)
     {
         try {

@@ -10,8 +10,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
+/**
+ * @group Purchasing
+ * @description APIs for managing purchase orders to suppliers.
+ */
 class PurchaseOrderController extends Controller
 {
+    /**
+     * List Purchase Orders
+     * @description Get a list of purchase orders.
+     * @queryParam branch_id string Filter by Branch.
+     */
     public function index(Request $request)
     {
         try {
@@ -25,6 +34,17 @@ class PurchaseOrderController extends Controller
         }
     }
 
+    /**
+     * Create Purchase Order
+     * @description Create a new purchase order.
+     * @bodyParam supplier_id string required Supplier UUID.
+     * @bodyParam branch_id string required Branch UUID.
+     * @bodyParam order_date date required Order Date.
+     * @bodyParam items object[] required List of ingredients.
+     * @bodyParam items[].ingredient_id string required Ingredient UUID.
+     * @bodyParam items[].quantity int required Quantity.
+     * @bodyParam items[].unit_price number required Unit Price.
+     */
     public function store(Request $request)
     {
         try {
@@ -74,6 +94,10 @@ class PurchaseOrderController extends Controller
         }
     }
 
+    /**
+     * Show Purchase Order
+     * @description Get purchase order details.
+     */
     public function show($id)
     {
         try {
@@ -84,6 +108,11 @@ class PurchaseOrderController extends Controller
         }
     }
 
+    /**
+     * Update Purchase Order
+     * @description Update a pending purchase order. Replaces all items.
+     * @bodyParam items object[] required List of ingredients.
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -131,6 +160,10 @@ class PurchaseOrderController extends Controller
         }
     }
 
+    /**
+     * Delete Purchase Order
+     * @description Delete a pending purchase order.
+     */
     public function destroy($id)
     {
         try {
@@ -145,6 +178,10 @@ class PurchaseOrderController extends Controller
         }
     }
 
+    /**
+     * Receive Purchase Order
+     * @description Mark order as received and update stock.
+     */
     public function receive($id)
     {
         try {

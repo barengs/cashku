@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
+/**
+ * @group Authentication
+ * @description APIs for user authentication and session management.
+ */
 class AuthController extends Controller
 {
     /**

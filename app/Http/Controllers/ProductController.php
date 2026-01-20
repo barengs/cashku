@@ -8,8 +8,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
+/**
+ * @group Product Management
+ * @description APIs for managing products and their recipes.
+ */
 class ProductController extends Controller
 {
+    /**
+     * List Products
+     * @description Get a list of products.
+     * @queryParam category_id string Filter by Category ID.
+     */
     public function index(Request $request)
     {
         try {
@@ -25,6 +34,19 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Create Product
+     * @description Create a new product.
+     * @bodyParam category_id string required Category UUID.
+     * @bodyParam name string required Product Name.
+     * @bodyParam description string optional Description.
+     * @bodyParam price number required Price.
+     * @bodyParam image file optional Product Image.
+     * @bodyParam is_active boolean optional status.
+     * @bodyParam recipes object[] optional List of ingredients.
+     * @bodyParam recipes[].ingredient_id string required Ingredient UUID.
+     * @bodyParam recipes[].quantity number required Amount used.
+     */
     public function store(Request $request)
     {
         try {
@@ -78,6 +100,10 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Show Product
+     * @description Get product details.
+     */
     public function show($id)
     {
         try {
@@ -88,6 +114,11 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Update Product
+     * @description Update product details.
+     * @bodyParam image file optional New Image.
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -135,6 +166,10 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Delete Product
+     * @description Delete a product.
+     */
     public function destroy($id)
     {
         try {

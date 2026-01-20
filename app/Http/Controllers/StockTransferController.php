@@ -10,8 +10,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
+/**
+ * @group Inventory Management
+ * @description APIs for transferring stock between branches.
+ */
 class StockTransferController extends Controller
 {
+    /**
+     * List Transfers
+     * @description Get a list of stock transfers.
+     */
     public function index()
     {
         try {
@@ -22,6 +30,16 @@ class StockTransferController extends Controller
         }
     }
 
+    /**
+     * Create Transfer
+     * @description Create a new stock transfer (Pending status).
+     * @bodyParam from_branch_id string required Source Branch.
+     * @bodyParam to_branch_id string required Destination Branch.
+     * @bodyParam transfer_date date required Date.
+     * @bodyParam items object[] required Items.
+     * @bodyParam items[].ingredient_id string required Ingredient UUID.
+     * @bodyParam items[].quantity number required Quantity to transfer.
+     */
     public function store(Request $request)
     {
         try {
@@ -83,6 +101,10 @@ class StockTransferController extends Controller
         }
     }
 
+    /**
+     * Show Transfer
+     * @description Get transfer details.
+     */
     public function show($id)
     {
         try {
@@ -93,6 +115,10 @@ class StockTransferController extends Controller
         }
     }
 
+    /**
+     * Update Transfer
+     * @description Update transfer details (Not Implemented).
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -109,6 +135,10 @@ class StockTransferController extends Controller
         }
     }
 
+    /**
+     * Ship Transfer
+     * @description Mark transfer as shipped and deduct source stock.
+     */
     public function ship($id)
     {
         try {
@@ -148,6 +178,10 @@ class StockTransferController extends Controller
         }
     }
 
+    /**
+     * Receive Transfer
+     * @description Mark transfer as received and add to destination stock.
+     */
     public function receive($id)
     {
         try {

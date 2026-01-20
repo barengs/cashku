@@ -29,7 +29,14 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => 'API Documentation for Cashku POS (Multi-Tenant).',
+        'description' => 'API Documentation for Cashku POS (Multi-Tenant).
+        
+        **Modules:**
+        - **Auth**: Authentication and User Management
+        - **Master Data**: Branches, Products, Tables, Employees, etc.
+        - **Transactions**: Orders, Payments, Shifts
+        - **Inventory**: Stock Management, Ingredients, Recipes
+        - **Reports**: Sales, Stock, and Financial Reports',
     ],
 
     /*

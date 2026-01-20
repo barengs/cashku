@@ -7,8 +7,16 @@ use App\Models\Ingredient;
 use Illuminate\Http\Request;
 use Exception;
 
+/**
+ * @group Inventory Management
+ * @description APIs for managing ingredients.
+ */
 class IngredientController extends Controller
 {
+    /**
+     * List Ingredients
+     * @description Get a list of ingredients and their stocks.
+     */
     public function index()
     {
         try {
@@ -19,6 +27,13 @@ class IngredientController extends Controller
         }
     }
 
+    /**
+     * Create Ingredient
+     * @description Create a new ingredient.
+     * @bodyParam name string required Ingredient Name.
+     * @bodyParam unit string required Unit (kg, liter, pcs).
+     * @bodyParam cost_per_unit number required Cost per unit.
+     */
     public function store(Request $request)
     {
         try {
@@ -35,6 +50,10 @@ class IngredientController extends Controller
         }
     }
 
+    /**
+     * Show Ingredient
+     * @description Get ingredient details.
+     */
     public function show($id)
     {
         try {
@@ -45,6 +64,13 @@ class IngredientController extends Controller
         }
     }
 
+    /**
+     * Update Ingredient
+     * @description Update ingredient details.
+     * @bodyParam name string optional Name.
+     * @bodyParam unit string optional Unit.
+     * @bodyParam cost_per_unit number optional Cost.
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -62,6 +88,10 @@ class IngredientController extends Controller
         }
     }
 
+    /**
+     * Delete Ingredient
+     * @description Delete an ingredient.
+     */
     public function destroy($id)
     {
         try {

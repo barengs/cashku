@@ -11,8 +11,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
+/**
+ * @group Order Management
+ * @description APIs for handling orders, payments, and cancellations.
+ */
 class OrderController extends Controller
 {
+    /**
+     * List Orders
+     * @description Get a list of orders with optional filters.
+     * @queryParam branch_id string Filter by Branch ID.
+     * @queryParam status string Filter by status (pending, completed, cancelled).
+     * @queryParam payment_status string Filter by payment status (unpaid, partial, paid).
+     * @queryParam start_date string Filter by creation date range start (YYYY-MM-DD).
+     * @queryParam end_date string Filter by creation date range end (YYYY-MM-DD).
+     */
     public function index(Request $request)
     {
         try {
@@ -37,6 +50,19 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * Create Order
+     * @description Create a new order (Dine In, Take Away, Delivery).
+     * @bodyParam branch_id string required Branch UUID.
+     * @bodyParam shift_id string optional Shift UUID.
+     * @bodyParam table_id string optional Table UUID (required for dine_in).
+     * @bodyParam customer_name string optional Customer Name.
+     * @bodyParam type string required Order type: dine_in, take_away, delivery.
+     * @bodyParam items object[] required List of order items.
+     * @bodyParam items[].product_id string required Product UUID.
+     * @bodyParam items[].quantity int required Quantity.
+     * @bodyParam items[].notes string optional Notes for the item.
+     */
     public function store(Request $request)
     {
         try {
@@ -101,6 +127,10 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * Show Order
+     * @description Get details of a specific order.
+     */
     public function show($id)
     {
         try {
@@ -111,6 +141,12 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * Process Payment
+     * @description Pay for an order. Can be partial or full payment.
+     * @bodyParam payment_method string required Payment method: cash, qris, debit, credit.
+     * @bodyParam amount number required Payment amount.
+     */
     public function pay(Request $request, $id)
     {
         try {
@@ -186,6 +222,10 @@ class OrderController extends Controller
         }
     }
 
+    /**
+     * Cancel Order
+     * @description Cancel an order. Cannot cancel if already completed.
+     */
     public function cancel($id)
     {
         try {

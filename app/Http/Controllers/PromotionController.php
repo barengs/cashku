@@ -7,8 +7,16 @@ use App\Models\Promotion;
 use Illuminate\Http\Request;
 use Exception;
 
+/**
+ * @group Marketing
+ * @description APIs for managing promotions.
+ */
 class PromotionController extends Controller
 {
+    /**
+     * List Promotions
+     * @description Get a list of promotions.
+     */
     public function index()
     {
         try {
@@ -19,6 +27,16 @@ class PromotionController extends Controller
         }
     }
 
+    /**
+     * Create Promotion
+     * @description Create a new promotion.
+     * @bodyParam name string required Promotion Name.
+     * @bodyParam type string required Type (fixed, percentage).
+     * @bodyParam value number required Discount Value.
+     * @bodyParam start_date date required Start Date.
+     * @bodyParam end_date date required End Date.
+     * @bodyParam is_active boolean optional Status.
+     */
     public function store(Request $request)
     {
         try {
@@ -38,6 +56,10 @@ class PromotionController extends Controller
         }
     }
 
+    /**
+     * Show Promotion
+     * @description Get promotion details.
+     */
     public function show($id)
     {
         try {
@@ -48,6 +70,16 @@ class PromotionController extends Controller
         }
     }
 
+    /**
+     * Update Promotion
+     * @description Update promotion details.
+     * @bodyParam name string optional Name.
+     * @bodyParam type string optional Type.
+     * @bodyParam value number optional Value.
+     * @bodyParam start_date date optional Start.
+     * @bodyParam end_date date optional End.
+     * @bodyParam is_active boolean optional Status.
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -69,6 +101,10 @@ class PromotionController extends Controller
         }
     }
 
+    /**
+     * Delete Promotion
+     * @description Delete a promotion.
+     */
     public function destroy($id)
     {
         try {

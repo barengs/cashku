@@ -10,8 +10,19 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 
+/**
+ * @group Shift Management
+ * @description APIs for managing start/end of shifts.
+ */
 class ShiftController extends Controller
 {
+    /**
+     * List Shifts
+     * @description Get a list of shifts.
+     * @queryParam branch_id string Filter by Branch.
+     * @queryParam user_id string Filter by User.
+     * @queryParam status string Filter by status (open, closed).
+     */
     public function index(Request $request)
     {
         try {
@@ -37,6 +48,12 @@ class ShiftController extends Controller
         }
     }
 
+    /**
+     * Open Shift
+     * @description Start a new shift.
+     * @bodyParam branch_id string required Branch UUID.
+     * @bodyParam start_cash number required Initial cash amount.
+     */
     public function open(Request $request)
     {
         try {
@@ -67,6 +84,12 @@ class ShiftController extends Controller
         }
     }
 
+    /**
+     * Close Shift
+     * @description End the current shift.
+     * @bodyParam actual_end_cash number required Counted cash at end of shift.
+     * @bodyParam note string optional Notes (e.g., reason for discrepancy).
+     */
     public function close(Request $request, $id)
     {
         try {
@@ -107,6 +130,10 @@ class ShiftController extends Controller
         }
     }
 
+    /**
+     * Show Shift
+     * @description Get shift details.
+     */
     public function show($id)
     {
         try {

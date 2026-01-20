@@ -98,6 +98,14 @@ class EmployeeController extends Controller
     /**
      * @group Employee Management
      * @description Update employee details.
+     * @bodyParam name string optional Name.
+     * @bodyParam email string optional Email.
+     * @bodyParam password string optional Password (min 8 chars).
+     * @bodyParam role string optional Role name.
+     * @bodyParam branch_id string optional Branch UUID.
+     * @bodyParam phone string optional Phone.
+     * @bodyParam address string optional Address.
+     * @bodyParam photo file optional Profile photo.
      */
     public function update(Request $request, $id)
     {
@@ -161,6 +169,10 @@ class EmployeeController extends Controller
         }
     }
 
+    /**
+     * @group Employee Management
+     * @description Delete an employee.
+     */
     public function destroy($id)
     {
         User::destroy($id);

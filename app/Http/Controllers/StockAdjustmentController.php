@@ -9,8 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
+/**
+ * @group Inventory Management
+ * @description APIs for stock adjustments (corrections).
+ */
 class StockAdjustmentController extends Controller
 {
+    /**
+     * List Adjustments
+     * @description Get a list of stock adjustments.
+     */
     public function index()
     {
         try {
@@ -21,6 +29,13 @@ class StockAdjustmentController extends Controller
         }
     }
 
+    /**
+     * Create Adjustment Draft
+     * @description Create a new stock adjustment draft.
+     * @bodyParam branch_id string required Branch UUID.
+     * @bodyParam adjustment_date date required Date.
+     * @bodyParam note string optional Note.
+     */
     public function store(Request $request)
     {
         try {
@@ -43,6 +58,10 @@ class StockAdjustmentController extends Controller
         }
     }
 
+    /**
+     * Show Adjustment
+     * @description Get adjustment details.
+     */
     public function show($id)
     {
         try {
@@ -53,6 +72,15 @@ class StockAdjustmentController extends Controller
         }
     }
 
+    /**
+     * Update Adjustment Draft
+     * @description Update an adjustment draft and its items.
+     * @bodyParam adjustment_date date optional Date.
+     * @bodyParam note string optional Note.
+     * @bodyParam items object[] optional List of items.
+     * @bodyParam items[].ingredient_id string required Ingredient UUID.
+     * @bodyParam items[].actual_stock number required Actual physical stock.
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -105,6 +133,10 @@ class StockAdjustmentController extends Controller
         }
     }
 
+    /**
+     * Finalize Adjustment
+     * @description Commit the adjustment and update actual stock levels.
+     */
     public function finalize($id)
     {
         try {

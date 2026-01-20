@@ -7,8 +7,16 @@ use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Exception;
 
+/**
+ * @group Product Management
+ * @description APIs for managing product categories.
+ */
 class ProductCategoryController extends Controller
 {
+    /**
+     * List Categories
+     * @description Get a list of product categories.
+     */
     public function index()
     {
         try {
@@ -19,6 +27,12 @@ class ProductCategoryController extends Controller
         }
     }
 
+    /**
+     * Create Category
+     * @description Create a new product category.
+     * @bodyParam name string required Category Name.
+     * @bodyParam description string optional Description.
+     */
     public function store(Request $request)
     {
         try {
@@ -34,6 +48,10 @@ class ProductCategoryController extends Controller
         }
     }
 
+    /**
+     * Show Category
+     * @description Get category details.
+     */
     public function show($id)
     {
         try {
@@ -44,6 +62,12 @@ class ProductCategoryController extends Controller
         }
     }
 
+    /**
+     * Update Category
+     * @description Update category details.
+     * @bodyParam name string optional Category Name.
+     * @bodyParam description string optional Description.
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -61,6 +85,10 @@ class ProductCategoryController extends Controller
         }
     }
 
+    /**
+     * Delete Category
+     * @description Delete a product category.
+     */
     public function destroy($id)
     {
         try {

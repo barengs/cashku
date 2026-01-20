@@ -11,8 +11,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
+/**
+ * @group Reporting
+ * @description APIs for business reports.
+ */
 class ReportController extends Controller
 {
+    /**
+     * Sales Report
+     * @description Get sales revenue, total orders, and average order value.
+     * @queryParam branch_id string Filter by Branch.
+     * @queryParam start_date string Start Date.
+     * @queryParam end_date string End Date.
+     */
     public function sales(Request $request)
     {
         try {
@@ -51,6 +62,13 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * Profit Report
+     * @description Get Gross Profit and Margin.
+     * @queryParam branch_id string Filter by Branch.
+     * @queryParam start_date string Start Date.
+     * @queryParam end_date string End Date.
+     */
     public function profit(Request $request)
     {
         try {
@@ -92,6 +110,11 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * Inventory Value
+     * @description Get current stock valuation.
+     * @queryParam branch_id string Filter by Branch.
+     */
     public function inventory(Request $request)
     {
         try {
@@ -121,6 +144,13 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * Cash Flow Report
+     * @description Get Inflow (Sales) vs Outflow (Expenses + Purchasing).
+     * @queryParam branch_id string Filter by Branch.
+     * @queryParam start_date string Start Date.
+     * @queryParam end_date string End Date.
+     */
     public function cashFlow(Request $request)
     {
         try {

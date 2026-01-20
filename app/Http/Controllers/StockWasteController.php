@@ -9,8 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
+/**
+ * @group Inventory Management
+ * @description APIs for recording wasted stock.
+ */
 class StockWasteController extends Controller
 {
+    /**
+     * List Waste Records
+     * @description Get a list of stock waste records.
+     */
     public function index()
     {
         try {
@@ -21,6 +29,17 @@ class StockWasteController extends Controller
         }
     }
 
+    /**
+     * Record Waste
+     * @description Create a new waste record (deducts stock immediately).
+     * @bodyParam branch_id string required Branch UUID.
+     * @bodyParam waste_date date required Date.
+     * @bodyParam note string optional Note.
+     * @bodyParam items object[] required List of items.
+     * @bodyParam items[].ingredient_id string required Ingredient UUID.
+     * @bodyParam items[].quantity number required Quantity wasted.
+     * @bodyParam items[].reason string optional Reason.
+     */
     public function store(Request $request)
     {
         try {
@@ -80,6 +99,10 @@ class StockWasteController extends Controller
         }
     }
 
+    /**
+     * Show Waste Record
+     * @description Get details of a waste record.
+     */
     public function show($id)
     {
         try {

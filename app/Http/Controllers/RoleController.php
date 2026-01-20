@@ -8,8 +8,16 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Exception;
 
+/**
+ * @group Role Management
+ * @description APIs for managing roles and permissions.
+ */
 class RoleController extends Controller
 {
+    /**
+     * List Roles
+     * @description Get a list of roles with their permissions.
+     */
     public function index()
     {
         try {

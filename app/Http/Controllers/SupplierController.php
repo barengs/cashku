@@ -7,11 +7,15 @@ use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Exception;
 
+/**
+ * @group Inventory Management
+ * @description Manage suppliers.
+ */
 class SupplierController extends Controller
 {
     /**
-     * @group Inventory Management
-     * @description Manage suppliers.
+     * List Suppliers
+     * @description Get a list of suppliers.
      */
     public function index()
     {
@@ -23,6 +27,14 @@ class SupplierController extends Controller
         }
     }
 
+    /**
+     * Create Supplier
+     * @description Create a new supplier.
+     * @bodyParam name string required Supplier Name.
+     * @bodyParam phone string optional Phone.
+     * @bodyParam email string optional Email.
+     * @bodyParam address string optional Address.
+     */
     public function store(Request $request)
     {
         try {
@@ -40,6 +52,10 @@ class SupplierController extends Controller
         }
     }
 
+    /**
+     * Show Supplier
+     * @description Get supplier details.
+     */
     public function show($id)
     {
         try {
@@ -50,6 +66,14 @@ class SupplierController extends Controller
         }
     }
 
+    /**
+     * Update Supplier
+     * @description Update supplier details.
+     * @bodyParam name string optional Supplier Name.
+     * @bodyParam phone string optional Phone.
+     * @bodyParam email string optional Email.
+     * @bodyParam address string optional Address.
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -68,6 +92,10 @@ class SupplierController extends Controller
         }
     }
 
+    /**
+     * Delete Supplier
+     * @description Delete a supplier.
+     */
     public function destroy($id)
     {
         try {
