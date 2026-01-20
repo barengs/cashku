@@ -75,11 +75,47 @@ class PurchaseOrderController extends Controller
         $validated = $request->validate([
             'supplier_id' => 'uuid|exists:suppliers,id',
             'order_date' => 'date',
-            'status' => 'in:pending,approved,cancelled', // Cannot set to received here
+            'status' => 'in:pending,approved,cancelled',
+            'items' => 'array|min:1',
+            'items.*.ingredient_id' => 'required_with:items|uuid|exists:ingredients,id',
+            'items.*.quantity' => 'required_with:items|numeric|min:0.01',
+            'items.*.unit_price' => 'required_with:items|numeric|min:0',
         ]);
 
-        $po->update($validated);
-        return response()->json($po);
+        DB::beginTransaction();
+        try {
+            // Update PO basic details
+            $po->update(collect($validated)->except('items')->toArray());
+
+            if (isset($validated['items'])) {
+                // Delete existing items
+                $po->items()->delete();
+
+                // Re-create items and calculate total
+                $totalAmount = 0;
+                foreach ($validated['items'] as $item) {
+                    $subtotal = $item['quantity'] * $item['unit_price'];
+                    $totalAmount += $subtotal;
+
+                    $po->items()->create([
+                        'ingredient_id' => $item['ingredient_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price'],
+                        'subtotal' => $subtotal,
+                    ]);
+                }
+
+                // Update total amount on PO
+                $po->total_amount = $totalAmount;
+                $po->save();
+            }
+
+            DB::commit();
+            return response()->json($po->load('items'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function receive($id)
