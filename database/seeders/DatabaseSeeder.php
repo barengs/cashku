@@ -17,9 +17,28 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Standard Roles for POS System
+        $roles = [
+            'Owner',
+            'Admin Pusat',
+            'Manajer Cabang',
+            'Kasir',
+            'Karyawan Dapur',
+        ];
+
+        foreach ($roles as $role) {
+            \Spatie\Permission\Models\Role::firstOrCreate(['name' => $role, 'guard_name' => 'api']);
+        }
+
+        // Example Owner User
+        $user = User::firstOrCreate(
+            ['email' => 'owner@example.com'],
+            [
+                'name' => 'Owner Cafe',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            ]
+        );
+
+        $user->assignRole('Owner');
     }
 }
