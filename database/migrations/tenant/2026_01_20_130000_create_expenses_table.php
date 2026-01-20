@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('expenses', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('branch_id')->constrained('branches')->cascadeOnDelete();
-            $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete(); // Who recorded it
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // Who recorded it
             
             $table->string('name');
             $table->decimal('amount', 15, 2);

@@ -1,59 +1,164 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Cashku - Multi-Tenant Cloud POS System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Cashku adalah sistem Point of Sale (POS) berbasis Cloud yang mendukung Multi-Tenant (banyak cabang/bisnis dalam satu aplikasi). Dibangun menggunakan Laravel, sistem ini dirancang untuk mengelola operasional kafe atau restoran dari hulu ke hilir.
 
-## About Laravel
+## 🚀 Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Sistem ini terdiri dari 5 Modul Utama:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Manajemen Pegawai (Employee)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **User Profile**: Kelola data diri dan foto profil.
+- **Role & Permission**: Hak akses berbeda untuk Owner, Manager, Kasir, dll.
+- **Authentication**: JWT Auth untuk keamanan API.
 
-## Learning Laravel
+### 2. Manajemen Inventori (Multi-Branch)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- **Suppliers**: Database pemasok bahan baku.
+- **Ingredients**: Manajemen bahan baku (satuan, harga pokok).
+- **Purchase Order (PO)**: Pembelian stok ke supplier.
+- **Stock Transfer**: Kirim stok antar cabang.
+- **Stock Waste**: Pencatatan stok terbuang/rusak.
+- **Stock Opname**: Penyesuaian stok fisik vs sistem.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 3. Menu & Harga (Product)
 
-## Laravel Sponsors
+- **Kategori & Menu**: Manajemen produk jual.
+- **Resep (Recipe)**: Link produk ke bahan baku untuk perhitungan HPP otomatis.
+- **Pricing & Promosi**: Atur harga jual dan diskon berdasarkan periode.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 4. Transaksi Kasir (POS)
 
-### Premium Partners
+- **Table Management**: Status meja (Available, Occupied).
+- **Shift Kasir**: Buka/Tutup shift dengan rekonsiliasi uang tunai.
+- **Order Processing**: Dine-in & Takeaway.
+- **Auto-Stock Deduction**: Stok bahan baku berkurang otomatis saat pembayaran sukses berdasarkan resep.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 5. Keuangan & Laporan
 
-## Contributing
+- **Expenses**: Catat biaya operasional (Listrik, Sewa, Gaji).
+- **Sales Report**: Laporan omzet dan produk terlaris.
+- **Profitability Report**: Laba kotor (Revenue - HPP).
+- **Cash Flow**: Arus kas masuk vs keluar.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 🛠️ Instalasi & Setup
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Prasyarat
 
-## Security Vulnerabilities
+- PHP 8.2+
+- Composer
+- MySQL / MariaDB (atau SQLite untuk testing)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Langkah Instalasi
 
-## License
+1. **Clone Repository**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    ```bash
+    git clone https://github.com/barengs/cashku.git
+    cd cashku
+    ```
+
+2. **Install Dependencies**
+
+    ```bash
+    composer install
+    ```
+
+3. **Setup Environment**
+   Salin `.env.example` ke `.env` dan sesuaikan konfigurasi database.
+
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+
+4. **Migrasi & Seeding Database**
+   Perintah ini akan membuat database central, membuat tenant default, dan menjalankan migrasi tenant.
+
+    ```bash
+    php artisan migrate:fresh --seed
+    ```
+
+    _Perintah ini menjalan `DatabaseSeeder` yang memanggil `TenantSeeder` untuk membuat tenant 'barengs' dengan database `tenantbarengs`._
+
+5. **Jalankan Server**
+    ```bash
+    php artisan serve
+    ```
+
+---
+
+## 🏢 Cara Membuat Tenant Baru
+
+Cashku menggunakan arsitektur Multi-Tenant dimana setiap tenant memiliki database terpisah.
+
+### Cara Otomatis (via Code/Tinker)
+
+Anda dapat menggunakan Laravel Tinker untuk membuat tenant baru secara cepat.
+
+1. Buka Tinker:
+
+    ```bash
+    php artisan tinker
+    ```
+
+2. Jalankan perintah pembuatan tenant:
+
+    ```php
+    // Buat Tenant dengan ID 'cabang01'
+    $tenant = App\Models\Tenant::create(['id' => 'cabang01']);
+
+    // Tambahkan Domain untuk akses (misal: cabang01.localhost)
+    $tenant->domains()->create(['domain' => 'cabang01.localhost']);
+
+    // (Opsional) Buat User Owner untuk tenant tersebut
+    $tenant->run(function () {
+        $user = App\Models\User::create([
+            'name' => 'Owner Cabang 01',
+            'email' => 'owner@cabang01.com',
+            'password' => bcrypt('password')
+        ]);
+        // Assign Role jika perlu
+        // $user->assignRole('Owner');
+    });
+    ```
+
+Saat `Tenant::create` dijalankan, sistem secara otomatis akan:
+
+1. Membuat database baru (misal: `tenantcabang01`).
+2. Menjalankan semua migrasi (tabel users, products, orders, dll) ke database tersebut.
+
+### Akses Tenant
+
+Setelah dibuat, Anda bisa mengakses API tenant tersebut melalui domain yang didaftarkan:
+
+- URL: `http://cabang01.localhost:8000/api/...`
+
+---
+
+## 📚 Dokumentasi API
+
+Sistem ini dilengkapi dengan **Scramble** untuk dokumentasi otomatis (OpenAPI/Swagger).
+
+Akses dokumentasi di browser:
+
+```
+http://{tenant_domain}/docs/api
+```
+
+Contoh untuk tenant default:
+[http://barengs.localhost:8000/docs/api](http://barengs.localhost:8000/docs/api)
+
+---
+
+## ✅ Testing
+
+Untuk memastikan semua modul berjalan dengan baik, jalankan automated test:
+
+```bash
+php artisan test
+```
+
+Saat ini terdapat **28 Tests** yang mencakup seluruh alur bisnis dari Employee hingga Financial Report.

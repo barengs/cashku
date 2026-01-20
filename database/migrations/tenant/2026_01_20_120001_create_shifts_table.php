@@ -15,8 +15,8 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('branch_id')->constrained('branches')->cascadeOnDelete();
             // Assuming users table is central but synced or referenced. 
-            // Since this is tenant migration, and users are in tenant DB (as per previous context), we use foreignUuid to users.
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+            // Since this is tenant migration, and users are in tenant DB (as per previous context), we use foreignId to users.
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             
             $table->dateTime('start_time');
             $table->dateTime('end_time')->nullable();
