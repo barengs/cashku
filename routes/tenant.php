@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+
+/*
+|--------------------------------------------------------------------------
+| Tenant Routes
+|--------------------------------------------------------------------------
+|
+| Here you can register the tenant routes for your application.
+| These routes are loaded by the TenantRouteServiceProvider.
+|
+| Feel free to customize them however you want. Good luck!
+|
+*/
+
+Route::middleware([
+    'web',
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,
+])->group(function () {
+    Route::prefix('api')->group(function () {
+        Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
+
+        Route::middleware('auth:api')->group(function () {
+            Route::post('logout', [App\Http\Controllers\AuthController::class, 'logout']);
+            Route::post('refresh', [App\Http\Controllers\AuthController::class, 'refresh']);
+            Route::get('me', [App\Http\Controllers\AuthController::class, 'me']);
+
+            Route::apiResource('branches', App\Http\Controllers\BranchController::class);
+            Route::apiResource('employees', App\Http\Controllers\EmployeeController::class);
+            Route::get('roles', [App\Http\Controllers\RoleController::class, 'index']);
+            
+            Route::apiResource('suppliers', App\Http\Controllers\SupplierController::class);
+            Route::apiResource('ingredients', App\Http\Controllers\IngredientController::class);
+
+            Route::post('purchase-orders/{id}/receive', [App\Http\Controllers\PurchaseOrderController::class, 'receive']);
+            Route::apiResource('purchase-orders', App\Http\Controllers\PurchaseOrderController::class);
+        });
+    });
+});
