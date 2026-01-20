@@ -62,6 +62,13 @@ Route::middleware([
 
             Route::post('orders/{id}/pay', [App\Http\Controllers\OrderController::class, 'pay']);
             Route::apiResource('orders', App\Http\Controllers\OrderController::class);
+
+            Route::apiResource('expenses', App\Http\Controllers\ExpenseController::class);
+
+            Route::get('reports/sales', [App\Http\Controllers\ReportController::class, 'sales']);
+            Route::get('reports/profit', [App\Http\Controllers\ReportController::class, 'profit']);
+            Route::get('reports/inventory', [App\Http\Controllers\ReportController::class, 'inventory']);
+            Route::get('reports/cash-flow', [App\Http\Controllers\ReportController::class, 'cashFlow']);
         });
     });
 });
