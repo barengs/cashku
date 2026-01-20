@@ -101,7 +101,7 @@ class PurchaseOrderTest extends TestCase
         $response = $this->postJson('http://test.localhost/api/purchase-orders', $payload);
 
         $response->assertStatus(201)
-            ->assertJsonStructure(['id', 'total_amount', 'items']);
+            ->assertJsonStructure(['data' => ['id', 'total_amount', 'items']]);
 
         $this->assertDatabaseHas('purchase_orders', [
             'branch_id' => $branch->id,
@@ -197,7 +197,7 @@ class PurchaseOrderTest extends TestCase
         $response = $this->postJson("http://test.localhost/api/purchase-orders/{$po->id}/receive");
 
         $response->assertStatus(200)
-            ->assertJson(['status' => 'received']);
+            ->assertJson(['data' => ['status' => 'received']]);
 
         $this->assertEquals(30, \App\Models\BranchStock::where('branch_id', $branch->id)->first()->quantity);
     }
@@ -223,7 +223,7 @@ class PurchaseOrderTest extends TestCase
             'status' => 'pending'
         ]);
 
-        $response->assertStatus(400)
-             ->assertJson(['error' => 'Cannot update a received order']);
+        $response->assertStatus(400) // Controller returns 400 for logic error, good.
+             ->assertJson(['error' => 'Cannot update non-pending order']);
     }
 }

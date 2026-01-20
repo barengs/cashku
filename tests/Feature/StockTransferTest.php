@@ -89,11 +89,11 @@ class StockTransferTest extends TestCase
         $response = $this->postJson('http://test.localhost/api/stock-transfers', $payload);
 
         $response->assertStatus(201)
-            ->assertJson([
+            ->assertJson(['data' => [
                 'status' => 'pending',
                 'from_branch_id' => $branchA->id,
                 'to_branch_id' => $branchB->id
-            ]);
+            ]]);
     }
 
     public function test_cannot_create_transfer_if_insufficient_stock()
@@ -153,7 +153,7 @@ class StockTransferTest extends TestCase
         $response = $this->postJson("http://test.localhost/api/stock-transfers/{$transfer->id}/ship");
 
         $response->assertStatus(200)
-            ->assertJson(['status' => 'shipped']);
+            ->assertJson(['data' => ['status' => 'shipped']]);
 
         $this->assertEquals(80, BranchStock::where('branch_id', $branchA->id)->first()->quantity);
     }
@@ -180,7 +180,7 @@ class StockTransferTest extends TestCase
         $response = $this->postJson("http://test.localhost/api/stock-transfers/{$transfer->id}/receive");
 
         $response->assertStatus(200)
-            ->assertJson(['status' => 'received']);
+            ->assertJson(['data' => ['status' => 'received']]);
 
         $this->assertEquals(20, BranchStock::where('branch_id', $branchB->id)->first()->quantity);
     }

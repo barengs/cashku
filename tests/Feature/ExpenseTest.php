@@ -70,7 +70,7 @@ class ExpenseTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-            ->assertJson(['name' => 'Electricity Bill', 'amount' => 500000]);
+            ->assertJson(['data' => ['name' => 'Electricity Bill', 'amount' => 500000]]);
             
         $this->assertDatabaseHas('expenses', ['name' => 'Electricity Bill']);
     }

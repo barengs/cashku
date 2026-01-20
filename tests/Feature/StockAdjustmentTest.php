@@ -84,11 +84,11 @@ class StockAdjustmentTest extends TestCase
         $response = $this->postJson('http://test.localhost/api/stock-adjustments', $payload);
 
         $response->assertStatus(201)
-            ->assertJson([
+            ->assertJson(['data' => [
                 'status' => 'draft',
                 'note' => 'Monthly Stock Opname',
                 'branch_id' => $branch->id
-            ]);
+            ]]);
             
         $this->assertDatabaseHas('stock_adjustments', [
             'note' => 'Monthly Stock Opname',
@@ -165,7 +165,7 @@ class StockAdjustmentTest extends TestCase
         $response = $this->postJson("http://test.localhost/api/stock-adjustments/{$adjustment->id}/finalize");
 
         $response->assertStatus(200)
-            ->assertJson(['status' => 'completed']);
+            ->assertJson(['data' => ['status' => 'completed']]);
 
         // Check Ingredient Stock refreshed
         $this->assertEquals(45, \App\Models\BranchStock::where('branch_id', $branch->id)->first()->quantity);
@@ -186,6 +186,6 @@ class StockAdjustmentTest extends TestCase
         ]);
 
         $response->assertStatus(400)
-            ->assertJson(['error' => 'Cannot update a completed adjustment']);
+            ->assertJson(['message' => 'Cannot update a completed adjustment']);
     }
 }

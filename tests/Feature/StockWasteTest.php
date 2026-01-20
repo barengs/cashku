@@ -83,7 +83,11 @@ class StockWasteTest extends TestCase
 
         $response = $this->postJson('http://test.localhost/api/stock-wastes', $payload);
 
-        $response->assertStatus(201);
+        $response->assertStatus(201)
+            ->assertJson(['data' => [
+                'branch_id' => $branch->id,
+                // 'note' => null // Optional check
+            ]]);
 
         $this->assertEquals(45, BranchStock::where('branch_id', $branch->id)->first()->quantity);
         

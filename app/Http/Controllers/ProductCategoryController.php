@@ -2,52 +2,73 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProductCategoryResource;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Exception;
 
 class ProductCategoryController extends Controller
 {
     public function index()
     {
-        return response()->json(ProductCategory::orderBy('name')->get());
+        try {
+            $categories = ProductCategory::orderBy('name')->get();
+            return ProductCategoryResource::collection($categories);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string'
+            ]);
 
-        $category = ProductCategory::create($validated);
-        return response()->json($category, 201);
+            $category = ProductCategory::create($validated);
+            return new ProductCategoryResource($category);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function show($id)
     {
-        $category = ProductCategory::findOrFail($id);
-        return response()->json($category);
+        try {
+            $category = ProductCategory::with('products')->findOrFail($id);
+            return new ProductCategoryResource($category);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $category = ProductCategory::findOrFail($id);
-        $validated = $request->validate([
-            'name' => 'string|max:255',
-            'description' => 'nullable|string',
-        ]);
+        try {
+            $category = ProductCategory::findOrFail($id);
+            
+            $validated = $request->validate([
+                'name' => 'string|max:255',
+                'description' => 'nullable|string'
+            ]);
 
-        $category->update($validated);
-        return response()->json($category);
+            $category->update($validated);
+            return new ProductCategoryResource($category);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function destroy($id)
     {
-        $category = ProductCategory::findOrFail($id);
-        
-        // Prevent delete if has products? Or set null (handled by DB constraint nullOnDelete)
-        $category->delete();
-        
-        return response()->json(null, 204);
+        try {
+            $category = ProductCategory::findOrFail($id);
+            $category->delete();
+            return response()->json(null, 204);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 }

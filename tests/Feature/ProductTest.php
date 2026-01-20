@@ -66,7 +66,7 @@ class ProductTest extends TestCase
             'name' => 'Beverages',
             'description' => 'Drinks'
         ]);
-        $response->assertStatus(201)->assertJson(['name' => 'Beverages']);
+        $response->assertStatus(201)->assertJson(['data' => ['name' => 'Beverages']]);
         
         // List
         $this->getJson('http://test.localhost/api/product-categories')
@@ -94,10 +94,10 @@ class ProductTest extends TestCase
         $response = $this->postJson('http://test.localhost/api/products', $payload);
 
         $response->assertStatus(201)
-            ->assertJson([
+            ->assertJson(['data' => [
                 'name' => 'Burger',
                 'cogs' => 7000 // 2000 + 5000
-            ]);
+            ]]);
 
         $this->assertDatabaseHas('products', ['name' => 'Burger']);
         $this->assertDatabaseHas('product_recipes', ['ingredient_id' => $ing1->id]);

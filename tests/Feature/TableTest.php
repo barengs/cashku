@@ -69,7 +69,7 @@ class TableTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-            ->assertJson(['number' => 'T01', 'capacity' => 4]);
+            ->assertJson(['data' => ['number' => 'T01', 'capacity' => 4]]);
             
         $this->assertDatabaseHas('tables', ['number' => 'T01']);
     }
@@ -90,7 +90,7 @@ class TableTest extends TestCase
             'capacity' => 4
         ]);
 
-        $response->assertStatus(500); // SQL Integrity Constraint Violation
+        $response->assertStatus(422); // We now check for duplicates and return 422
     }
 
     public function test_can_update_table_status()

@@ -2,154 +2,192 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PurchaseOrder;
+use App\Http\Resources\PurchaseOrderResource;
+use App\Models\BranchStock;
 use App\Models\Ingredient;
+use App\Models\PurchaseOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class PurchaseOrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = PurchaseOrder::with('supplier')->orderBy('order_date', 'desc')->get();
-        return response()->json($orders);
+        try {
+            $query = PurchaseOrder::with(['supplier', 'items.ingredient']);
+            if ($request->has('branch_id')) {
+                $query->where('branch_id', $request->branch_id);
+            }
+            return PurchaseOrderResource::collection($query->get());
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'branch_id' => 'required|uuid|exists:branches,id',
-            'supplier_id' => 'required|uuid|exists:suppliers,id',
-            'order_date' => 'required|date',
-            'status' => 'in:pending,approved,received,cancelled',
-            'items' => 'required|array|min:1',
-            'items.*.ingredient_id' => 'required|uuid|exists:ingredients,id',
-            'items.*.quantity' => 'required|numeric|min:0.01',
-            'items.*.unit_price' => 'required|numeric|min:0',
-        ]);
-
-        DB::beginTransaction();
         try {
-            $totalAmount = 0;
-            foreach ($validated['items'] as $item) {
-                $totalAmount += $item['quantity'] * $item['unit_price'];
-            }
-
-            $po = PurchaseOrder::create([
-                'branch_id' => $validated['branch_id'],
-                'supplier_id' => $validated['supplier_id'],
-                'order_date' => $validated['order_date'],
-                'status' => $validated['status'] ?? 'pending',
-                'total_amount' => $totalAmount,
+            $validated = $request->validate([
+                'supplier_id' => 'required|uuid|exists:suppliers,id',
+                'branch_id' => 'required|uuid|exists:branches,id',
+                'order_date' => 'required|date',
+                'items' => 'required|array|min:1',
+                'items.*.ingredient_id' => 'required|uuid|exists:ingredients,id',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.unit_price' => 'required|numeric|min:0',
             ]);
 
-            foreach ($validated['items'] as $item) {
-                $po->items()->create([
-                    'ingredient_id' => $item['ingredient_id'],
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'subtotal' => $item['quantity'] * $item['unit_price'],
+            DB::beginTransaction();
+            try {
+                $po = PurchaseOrder::create([
+                    'supplier_id' => $validated['supplier_id'],
+                    'branch_id' => $validated['branch_id'],
+                    'order_date' => $validated['order_date'],
+                    'status' => 'pending',
+                    'total_amount' => 0 // calculated below
                 ]);
-            }
 
-            DB::commit();
-            return response()->json($po->load('items'), 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+                $total = 0;
+                foreach ($validated['items'] as $item) {
+                    $subtotal = $item['quantity'] * $item['unit_price'];
+                    $po->items()->create([
+                        'ingredient_id' => $item['ingredient_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['unit_price'],
+                        'subtotal' => $subtotal
+                    ]);
+                    $total += $subtotal;
+                }
+
+                $po->total_amount = $total;
+                $po->save();
+
+                DB::commit();
+                return new PurchaseOrderResource($po->load(['supplier', 'items.ingredient']));
+            } catch (Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
     public function show($id)
     {
-        $po = PurchaseOrder::with(['supplier', 'items.ingredient', 'branch'])->findOrFail($id);
-        return response()->json($po);
+        try {
+            $po = PurchaseOrder::with(['supplier', 'items.ingredient'])->findOrFail($id);
+            return new PurchaseOrderResource($po);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $po = PurchaseOrder::findOrFail($id);
-        
-        if ($po->status === 'received') {
-             return response()->json(['error' => 'Cannot update a received order'], 400);
-        }
-
-        $validated = $request->validate([
-            'branch_id' => 'uuid|exists:branches,id',
-            'supplier_id' => 'uuid|exists:suppliers,id',
-            'order_date' => 'date',
-            'status' => 'in:pending,approved,cancelled',
-            'items' => 'array|min:1',
-            'items.*.ingredient_id' => 'required_with:items|uuid|exists:ingredients,id',
-            'items.*.quantity' => 'required_with:items|numeric|min:0.01',
-            'items.*.unit_price' => 'required_with:items|numeric|min:0',
-        ]);
-
-        DB::beginTransaction();
         try {
-            // Update PO basic details
-            $po->update(collect($validated)->except('items')->toArray());
+            $po = PurchaseOrder::findOrFail($id);
 
-            if (isset($validated['items'])) {
-                // Delete existing items
+            if ($po->status !== 'pending') {
+                return response()->json(['error' => 'Cannot update non-pending order'], 400);
+            }
+
+            $validated = $request->validate([
+                'items' => 'required|array|min:1',
+                'items.*.ingredient_id' => 'required|uuid|exists:ingredients,id',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.unit_price' => 'required|numeric|min:0',
+            ]);
+
+            DB::beginTransaction();
+            try {
+                // Delete old items
                 $po->items()->delete();
 
-                // Re-create items and calculate total
-                $totalAmount = 0;
+                $total = 0;
                 foreach ($validated['items'] as $item) {
                     $subtotal = $item['quantity'] * $item['unit_price'];
-                    $totalAmount += $subtotal;
-
                     $po->items()->create([
                         'ingredient_id' => $item['ingredient_id'],
                         'quantity' => $item['quantity'],
                         'unit_price' => $item['unit_price'],
-                        'subtotal' => $subtotal,
+                        'subtotal' => $subtotal
                     ]);
+                    $total += $subtotal;
                 }
 
-                // Update total amount on PO
-                $po->total_amount = $totalAmount;
+                $po->total_amount = $total;
                 $po->save();
-            }
 
-            DB::commit();
-            return response()->json($po->load('items'));
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+                DB::commit();
+                return new PurchaseOrderResource($po->load(['supplier', 'items.ingredient']));
+            } catch (Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $po = PurchaseOrder::findOrFail($id);
+            if ($po->status !== 'pending') {
+                return response()->json(['error' => 'Cannot delete non-pending order'], 400);
+            }
+            $po->delete();
+            return response()->json(null, 204);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
     public function receive($id)
     {
-        $po = PurchaseOrder::with('items')->findOrFail($id);
-
-        if ($po->status === 'received') {
-            return response()->json(['error' => 'Order already received'], 400);
-        }
-
-        DB::beginTransaction();
         try {
-            // Update Stock in BranchStock
-            foreach ($po->items as $item) {
-                $branchStock = \App\Models\BranchStock::firstOrNew([
-                    'branch_id' => $po->branch_id,
-                    'ingredient_id' => $item->ingredient_id,
-                ]);
-                
-                $branchStock->quantity = ($branchStock->quantity ?? 0) + $item->quantity;
-                $branchStock->save();
+            $po = PurchaseOrder::with('items')->findOrFail($id);
+
+            if ($po->status === 'received') {
+                return response()->json(['error' => 'Order already received'], 400);
             }
 
-            $po->status = 'received';
-            $po->save();
+            DB::beginTransaction();
+            try {
+                // Update Stock per Branch
+                foreach ($po->items as $item) {
+                    // Update BranchStock
+                    $stock = BranchStock::where('branch_id', $po->branch_id)
+                        ->where('ingredient_id', $item->ingredient_id)
+                        ->first();
+                    
+                    if ($stock) {
+                        $stock->quantity += $item->quantity;
+                        $stock->save();
+                    } else {
+                        BranchStock::create([
+                            'branch_id' => $po->branch_id,
+                            'ingredient_id' => $item->ingredient_id,
+                            'quantity' => $item->quantity
+                        ]);
+                    }
 
-            DB::commit();
-            return response()->json($po->load('items'));
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+                    // Optional: Update cost_per_unit logic could go here
+                }
+
+                $po->status = 'received';
+                $po->save();
+
+                DB::commit();
+                return new PurchaseOrderResource($po->load(['items', 'supplier']));
+            } catch (Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 }
