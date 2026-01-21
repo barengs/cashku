@@ -16,7 +16,7 @@ use App\Models\Expense;
 use Spatie\Permission\Models\Role;
 use Carbon\Carbon;
 
-class TenantDatabaseSeeder extends Seeder
+class CoreDataSeeder extends Seeder
 {
     public function run()
     {
@@ -27,15 +27,16 @@ class TenantDatabaseSeeder extends Seeder
         }
 
         // 2. Users
+        // 2. Users
         $owner = User::firstOrCreate(
             ['email' => 'owner@example.com'],
-            ['name' => 'Owner Cafe', 'password' => bcrypt('password')]
+            ['name' => 'Owner Cafe', 'password' => bcrypt('password'), 'phone' => '081234567890']
         );
         $owner->assignRole('Owner');
 
         $kasir = User::firstOrCreate(
             ['email' => 'kasir@example.com'],
-            ['name' => 'Kasir 1', 'password' => bcrypt('password')]
+            ['name' => 'Kasir 1', 'password' => bcrypt('password'), 'phone' => '089876543210']
         );
         $kasir->assignRole('Kasir');
 

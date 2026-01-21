@@ -28,6 +28,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('ingredients', App\Http\Controllers\IngredientController::class);
 
     Route::post('purchase-orders/{id}/receive', [App\Http\Controllers\PurchaseOrderController::class, 'receive']);
+    Route::post('purchase-orders/{id}/approve', [App\Http\Controllers\PurchaseOrderController::class, 'approve']);
     Route::apiResource('purchase-orders', App\Http\Controllers\PurchaseOrderController::class);
 
     Route::post('stock-adjustments/{id}/finalize', [App\Http\Controllers\StockAdjustmentController::class, 'finalize']);

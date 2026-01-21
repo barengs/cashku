@@ -179,6 +179,25 @@ class PurchaseOrderController extends Controller
     }
 
     /**
+     * Approve Purchase Order
+     * @description Approve a pending purchase order.
+     */
+    public function approve($id)
+    {
+        try {
+            $po = PurchaseOrder::findOrFail($id);
+            if ($po->status !== 'pending') {
+                return response()->json(['error' => 'Cannot approve non-pending order'], 400);
+            }
+            $po->status = 'approved';
+            $po->save();
+            return new PurchaseOrderResource($po);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Receive Purchase Order
      * @description Mark order as received and update stock.
      */
