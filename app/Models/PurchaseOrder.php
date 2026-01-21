@@ -11,6 +11,7 @@ class PurchaseOrder extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'branch_id',
         'supplier_id',
         'order_date',
         'status',
@@ -21,6 +22,11 @@ class PurchaseOrder extends Model
         'order_date' => 'date',
         'total_amount' => 'decimal:2',
     ];
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
 
     public function supplier()
     {
