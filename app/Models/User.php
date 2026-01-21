@@ -22,6 +22,7 @@ class User extends Authenticatable implements \PHPOpenSourceSaver\JWTAuth\Contra
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
     ];
 
